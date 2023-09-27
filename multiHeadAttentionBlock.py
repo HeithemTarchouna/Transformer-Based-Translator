@@ -2,31 +2,29 @@ import torch
 import torch.nn as nn
 
 class MultiHeadAttentionBlock(nn.Module):
+    """
+    MultiHeadAttentionBlock Module:
+
+    This class represents the multi-head attention block used within the Transformer's encoder and decoder layers.
+    The multi-head mechanism allows the model to focus on different words for a given input word. 
+
+    Parameters:
+    - d_model (int): The dimensionality of input and output. Represents depth of the input feature set.
+    - h (int): Number of attention heads.
+    - dropout (float): Dropout rate for regularization.
     
+    Attributes:
+    - d_model (int): The dimensionality of input and output.
+    - h (int): Number of attention heads.
+    - d_k (int): Dimensionality of queries and keys (d_model // h).
+    - w_q (nn.Linear): Linear layer for transforming queries.
+    - w_k (nn.Linear): Linear layer for transforming keys.
+    - w_v (nn.Linear): Linear layer for transforming values.
+    - w_o (nn.Linear): Final linear layer for producing the output.
+    - dropout (nn.Dropout): Dropout layer for regularization.
+    """
+
     def __init__(self, d_model:int, h:int, dropout:float):
-
-        """
-        MultiHeadAttentionBlock Module:
-
-        This class represents the multi-head attention block used within the Transformer's encoder and decoder layers.
-        The multi-head mechanism allows the model to focus on different words for a given input word. 
-
-        Parameters:
-        - d_model (int): The dimensionality of input and output. Represents depth of the input feature set.
-        - h (int): Number of attention heads.
-        - dropout (float): Dropout rate for regularization.
-        
-        Attributes:
-        - d_model (int): The dimensionality of input and output.
-        - h (int): Number of attention heads.
-        - d_k (int): Dimensionality of queries and keys (d_model // h).
-        - w_q (nn.Linear): Linear layer for transforming queries.
-        - w_k (nn.Linear): Linear layer for transforming keys.
-        - w_v (nn.Linear): Linear layer for transforming values.
-        - w_o (nn.Linear): Final linear layer for producing the output.
-        - dropout (nn.Dropout): Dropout layer for regularization.
-        """
-
         super().__init__()
         self.d_model = d_model
         self.h = h 
@@ -79,6 +77,18 @@ class MultiHeadAttentionBlock(nn.Module):
 
 
     def forward(self,q,k,v,mask=None):
+        """
+        Forward pass for the MultiHeadAttentionBlock module.
+        
+        Parameters:
+        - q (torch.Tensor): Query tensor of shape (batch_size, seq_len, d_model).
+        - k (torch.Tensor): Key tensor of shape (batch_size, seq_len, d_model).
+        - v (torch.Tensor): Value tensor of shape (batch_size, seq_len, d_model).
+        - mask (torch.Tensor): Mask to avoid attending to certain positions.
+        
+        Returns:
+        - torch.Tensor: Output tensor of shape (batch_size, seq_len, d_model).
+        """
 
         # (batch_size, seq_len, d_model) -> (batch_size, seq_len, d_model)
         query = self.w_q(q)
