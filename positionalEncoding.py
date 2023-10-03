@@ -22,11 +22,10 @@ class PositionalEncoding(nn.Module):
     - pe (torch.Tensor): The tensor containing the precomputed positional encodings.
     """
     def __init__(self, d_model:int, seq_len:int, dropout:float ):
+        super().__init__()
         self.d_model = d_model
         self.seq_len = seq_len
         self.dropout = nn.Dropout(p=dropout)
-        super().__init__()
-
 
         # Create constant 'pe' matrix with shape (seq_len, d_model)
         pe = torch.zeros(seq_len, d_model)
