@@ -5,11 +5,25 @@ from decoder import Decoder
 from projectionLayer import ProjectionLayer
 from positionalEncoding import PositionalEncoding
 from encoderBlock import EncoderBlock
+from decoderBlock import DecoderBlock
 from multiHeadAttentionBlock import MultiHeadAttentionBlock
 from feedForwardBlock import FeedForwardBlock
 from inputEmbeddings import InputEmbeddings
 
 class Transformer(nn.Module):
+    def __init__(self, encoder: Encoder, decoder: Decoder, src_embed: InputEmbeddings, tgt_embed: InputEmbeddings, src_pos: PositionalEncoding, tgt_pos: PositionalEncoding, projection_layer: ProjectionLayer) -> None:
+        super().__init__()
+        self.encoder = encoder
+        self.decoder = decoder
+        self.src_embedding = src_embed
+        self.tgt_embedding = tgt_embed
+        self.src_positional_encoding = src_pos
+        self.tgt_positional_encoding = tgt_pos
+        self.projection_layer = projection_layer
+
+
+
+
     """
     Transformer Module:
     ...
@@ -40,9 +54,10 @@ class Transformer(nn.Module):
         """
         src = self.src_embedding(src)
         src = self.src_positional_encoding(src)
-        return self.encoder(src, src_mask)
+        src = self.encoder(src, src_mask)
+        return src
 
-    def decode(self, tgt, encoder_output, src_mask, tgt_mask):
+    def decode(self, encoder_output, src_mask, tgt, tgt_mask):
         """
         Perform decoding using encoder outputs and target sequence.
         tgt: Tensor of shape (batch_size, tgt_seq_len)
@@ -52,8 +67,11 @@ class Transformer(nn.Module):
         Returns: Tensor of shape (batch_size, tgt_seq_len, d_model)
         """
         tgt = self.tgt_embedding(tgt)
+        print("passed embedding")
         tgt = self.tgt_positional_encoding(tgt)
-        return self.decoder(tgt, encoder_output, src_mask, tgt_mask)
+        print("passed positional encoding")
+        tgt = self.decoder(tgt, encoder_output, src_mask, tgt_mask)
+        return tgt
 
     def project(self, tgt):
         """
@@ -62,6 +80,26 @@ class Transformer(nn.Module):
         Returns: Tensor of shape (batch_size, tgt_seq_len, vocab_size)
         """
         return self.projection_layer(tgt)
+    
+    # def forward(self, src, tgt, src_mask, tgt_mask):
+    #     """
+    #     Defines the computation performed at every call.
+
+    #     Parameters:
+    #     - src (Tensor): Source sequence, shape (batch_size, src_seq_len)
+    #     - tgt (Tensor): Target sequence, shape (batch_size, tgt_seq_len)
+    #     - src_mask (Tensor): Source sequence mask, shape (batch_size, 1, 1, src_seq_len)
+    #     - tgt_mask (Tensor): Target sequence mask, shape (batch_size, 1, tgt_seq_len, tgt_seq_len)
+
+    #     Returns:
+    #     - Tensor: Output tensor of shape (batch_size, tgt_seq_len, vocab_size)
+    #     """
+    #     encoder_output = self.encode(src, src_mask)
+    #     decoder_output = self.decode(tgt, encoder_output, src_mask, tgt_mask)
+    #     return self.project(decoder_output)
+
+
+
 def build_transformer(src_vocab_size:int,
                       tgt_vocab_size:int,
                       src_seq_len:int,
@@ -89,19 +127,19 @@ def build_transformer(src_vocab_size:int,
                                 dropout)
     
     encoder_layers = nn.ModuleList([encoderBlock for _ in range(num_encoder_layers)])
-    encoder = Encoder(encoder_layers)
+    encoder = Encoder(d_model,encoder_layers)
     #---------------------------------------------------------------------------------------
 
     # Decoder
     #---------------------------------------------------------------------------------------
     tgt_embedding = InputEmbeddings(d_model,tgt_vocab_size)
     tgt_positional_encoding = PositionalEncoding(d_model,tgt_seq_len,dropout)
-    decoderBlock = EncoderBlock(MultiHeadAttentionBlock(d_model,nhead,dropout),
+    decoderBlock = DecoderBlock(MultiHeadAttentionBlock(d_model,nhead,dropout),MultiHeadAttentionBlock(d_model,nhead,dropout),
                                 FeedForwardBlock(d_model,d_ff,dropout),
                                 dropout)
     
     decoder_layers = nn.ModuleList([decoderBlock for _ in range(num_decoder_layers)])
-    decoder = Decoder(decoder_layers)
+    decoder = Decoder(d_model,decoder_layers)
     #---------------------------------------------------------------------------------------
 
     # Projection Layer

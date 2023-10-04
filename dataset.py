@@ -38,23 +38,29 @@ class BilingualDataset(Dataset):
         
         # add sos and eos tokens to encoder
         encoder_input = torch.cat(
+            [
             self.sos_token,
             torch.tensor(enc_input_tokens,dtype=torch.int64),
             self.eos_token,
-            self.pad_token.repeat(src_num_pad_tokens)
+            torch.tensor([self.pad_token]*src_num_pad_tokens , dtype=torch.int64)
+            ],
+            dim=0
         )
 
         # add eos token to decoder
         decoder_input = torch.cat(
+            [
             self.sos_token,
             torch.tensor(dec_input_tokens,dtype=torch.int64),
-            self.pad_token.repeat(tgt_num_pad_tokens)
+            torch.tensor([self.pad_token]*tgt_num_pad_tokens , dtype=torch.int64)
+            ],
+            dim=0
         )
         # add eos token to label (what we expect as output from the decoder)
-        label = torch.cat(
+        label = torch.cat([
             torch.tensor(dec_input_tokens,dtype=torch.int64),
             self.eos_token,
-            self.pad_token.repeat(tgt_num_pad_tokens)
+            torch.tensor([self.pad_token]*tgt_num_pad_tokens , dtype=torch.int64)], dim=0
         )
 
         assert len(encoder_input) == self.seq_len
@@ -66,10 +72,10 @@ class BilingualDataset(Dataset):
             "decoder_input":decoder_input, # (seq_len)
             # (1,1,seq_len) # 1 for tokens we want to attend to, 0 for tokens we want to ignore (padding)
             # we unsqueeze twice to add the batch and sequence length dimensions
-            "encoder_attention_mask":(encoder_input != self.pad_token).unsqueeze(0).unsqueeze(0).int64(), 
+            "encoder_attention_mask":(encoder_input != self.pad_token).unsqueeze(0).unsqueeze(0).int(), 
 
             # we need a causal mask for the decoder attention mask 
-            "decoder_attention_mask": (decoder_input != self.pad_token).unsqueeze(0).unsqueeze(0).int64() & causal_mask(decoder_input.size(0)), # (1,1,seq_len) & (1,seq_len,seq_len) = (1,seq_len,seq_len)
+            "decoder_attention_mask": (decoder_input != self.pad_token).unsqueeze(0).int() & causal_mask(decoder_input.size(0)), # (1,1,seq_len) & (1,seq_len,seq_len) = (1,seq_len,seq_len)
             "label":label,# (seq_len)
             "src_text":src_text,
             "tgt_text":tgt_text
@@ -79,7 +85,7 @@ class BilingualDataset(Dataset):
 def causal_mask(seq_len):
     # create a mask that prevents the decoder from attending to tokens that haven't been generated yet
     # (1,seq_len,seq_len)
-    mask = torch.triu(torch.ones(1,3,3).int(), diagonal=1)
+    mask = torch.triu(torch.ones(1,seq_len,seq_len).int(), diagonal=1)
     # (1,seq_len,seq_len)
     return mask == 0 # 1 for tokens we want to attend to, 0 for tokens we want to ignore (padding)
 

@@ -23,14 +23,14 @@ class Decoder(nn.Module):
     output sequence.
     """
 
-    def __init__(self, layers: nn.ModuleList):
+    def __init__(self,features, layers: nn.ModuleList):
         super().__init__()
 
         # Sequence of DecoderBlock layers
         self.layers = layers
 
         # Layer Normalization for the output of the final DecoderBlock
-        self.norm = LayerNormalization()
+        self.norm = LayerNormalization(features)
 
     def forward(self, x, encoder_output, src_masks, tgt_masks):
         """

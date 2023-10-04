@@ -21,14 +21,14 @@ class Encoder(nn.Module):
     This module is used as the encoder in a Transformer model, processing the input sequence before it's fed into the decoder.
     """
 
-    def __init__(self, layers: nn.ModuleList):
+    def __init__(self,features, layers: nn.ModuleList):
         super().__init__()
 
         # Sequence of EncoderBlock layers
         self.layers = layers
 
         # Layer Normalization for the output of the final EncoderBlock
-        self.norm = LayerNormalization()
+        self.norm = LayerNormalization(features)
 
     def forward(self, x, src_mask):
         """
