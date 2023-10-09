@@ -20,10 +20,10 @@ class ResidualConnection(nn.Module):
     - dropout (nn.Dropout): Dropout layer for regularization.
     - norm (LayerNormalization): Layer normalization.
     """
-    def __init__(self, dropout: float):
+    def __init__(self,features:int, dropout: float):
         super().__init__()
         self.dropout = nn.Dropout(dropout)
-        self.norm = LayerNormalization()
+        self.norm = LayerNormalization(features)
 
     def forward(self, x, sublayer):
         return x + self.dropout(sublayer(self.norm(x))) 

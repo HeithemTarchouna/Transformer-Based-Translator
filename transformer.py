@@ -67,9 +67,9 @@ class Transformer(nn.Module):
         Returns: Tensor of shape (batch_size, tgt_seq_len, d_model)
         """
         tgt = self.tgt_embedding(tgt)
-        print("passed embedding")
+        #print("passed embedding")
         tgt = self.tgt_positional_encoding(tgt)
-        print("passed positional encoding")
+        #print("passed positional encoding")
         tgt = self.decoder(tgt, encoder_output, src_mask, tgt_mask)
         return tgt
 
@@ -122,7 +122,8 @@ def build_transformer(src_vocab_size:int,
     src_embedding = InputEmbeddings(d_model,src_vocab_size)
     src_positional_encoding = PositionalEncoding(d_model,src_seq_len,dropout)
 
-    encoderBlock = EncoderBlock(MultiHeadAttentionBlock(d_model,nhead,dropout),
+    encoderBlock = EncoderBlock(d_model,
+        MultiHeadAttentionBlock(d_model,nhead,dropout),
                                 FeedForwardBlock(d_model,d_ff,dropout),
                                 dropout)
     
@@ -134,7 +135,8 @@ def build_transformer(src_vocab_size:int,
     #---------------------------------------------------------------------------------------
     tgt_embedding = InputEmbeddings(d_model,tgt_vocab_size)
     tgt_positional_encoding = PositionalEncoding(d_model,tgt_seq_len,dropout)
-    decoderBlock = DecoderBlock(MultiHeadAttentionBlock(d_model,nhead,dropout),MultiHeadAttentionBlock(d_model,nhead,dropout),
+    decoderBlock = DecoderBlock(d_model,
+        MultiHeadAttentionBlock(d_model,nhead,dropout),MultiHeadAttentionBlock(d_model,nhead,dropout),
                                 FeedForwardBlock(d_model,d_ff,dropout),
                                 dropout)
     

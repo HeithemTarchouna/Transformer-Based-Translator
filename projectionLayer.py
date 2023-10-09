@@ -48,4 +48,5 @@ class ProjectionLayer(nn.Module):
 
         # (batch_size, seq_len, d_model) -> (batch_size, seq_len, vocab_size)
         # Note: Log softmax is applied here to obtain log probabilities, ensure to use it accordingly in the loss calculation
-        return torch.nn.functional.log_softmax(self.projection_head(x), dim=-1)
+        #return torch.nn.functional.log_softmax(self.projection_head(x), dim=-1)
+        return self.projection_head(x)

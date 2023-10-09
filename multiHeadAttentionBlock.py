@@ -30,10 +30,10 @@ class MultiHeadAttentionBlock(nn.Module):
         self.h = h 
         assert d_model % h == 0, "d_model must be divisible by h"
         self.d_k = d_model // h
-        self.w_q = nn.Linear(d_model, d_model)
-        self.w_k = nn.Linear(d_model, d_model)
-        self.w_v = nn.Linear(d_model, d_model)
-        self.w_o = nn.Linear(d_model, d_model) # dv = dk = d_model // h
+        self.w_q = nn.Linear(d_model, d_model,bias=False)
+        self.w_k = nn.Linear(d_model, d_model,bias=False)
+        self.w_v = nn.Linear(d_model, d_model,bias=False)
+        self.w_o = nn.Linear(d_model, d_model,bias=False) # dv = dk = d_model // h
         self.dropout = nn.Dropout(dropout)
 
     @staticmethod   
@@ -65,7 +65,7 @@ class MultiHeadAttentionBlock(nn.Module):
 
         # (batch_size, h, seq_len, seq_len,seq_len)
         # Apply softmax to obtain attention distribution
-        attention_scores = nn.Softmax(dim=-1)(attention_scores)
+        attention_scores = attention_scores.softmax(dim=-1)
 
         # Apply dropout for regularization
         if droput is not None:

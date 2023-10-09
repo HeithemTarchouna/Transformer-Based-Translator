@@ -17,13 +17,13 @@ class LayerNormalization(nn.Module):
     - alpha (torch.nn.Parameter): Scale factor. This is a learnable parameter that scales the normalized output.
     - bias (torch.nn.Parameter): Offset factor. This is a learnable parameter that shifts the normalized output.
     """
-    def __init__(self,eps:float = 1e-6,):
+    def __init__(self,features,eps:float = 1e-6,):
         super().__init__()
         self.eps = eps
         # Scale factor (learnable parameter) that will be multiplied to the normalized value
-        self.alpha = nn.Parameter(torch.ones(1))         
+        self.alpha = nn.Parameter(torch.ones(features))         
         # Offset (learnable parameter) that will be added to the normalized value
-        self.bias = nn.Parameter(torch.zeros(1)) # nn.paramater makes it a learnable parameter || added
+        self.bias = nn.Parameter(torch.zeros(features)) # nn.paramater makes it a learnable parameter || added
 
     def forward(self, x):
         """

@@ -23,7 +23,7 @@ class EncoderBlock(nn.Module):
     - residual_connections (nn.ModuleList): List of residual connections. Each residual connection wraps around each sub-layer.
     """
 
-    def __init__(self,
+    def __init__(self,features:int,
                  self_attention_block: MultiHeadAttentionBlock,
                  feed_forward_block: FeedForwardBlock,
                  dropout: float):
@@ -37,7 +37,7 @@ class EncoderBlock(nn.Module):
         
         # Define two residual connections: one for each sub-layer
         # Using ModuleList to register each residual connection as a submodule of EncoderBlock
-        self.residual_connections = nn.ModuleList([ResidualConnection(dropout) for _ in range(2)])
+        self.residual_connections = nn.ModuleList([ResidualConnection(features,dropout) for _ in range(2)])
 
     def forward(self, x, src_mask):
         """

@@ -29,7 +29,7 @@ class DecoderBlock(nn.Module):
     The DecoderBlock is used as a building block for constructing the Decoder of the Transformer model.
     """
 
-    def __init__(self,
+    def __init__(self,features:int,
                  self_attention_block: MultiHeadAttentionBlock,
                  cross_attention_block: MultiHeadAttentionBlock,
                  feed_forward_block: FeedForwardBlock,
@@ -46,7 +46,7 @@ class DecoderBlock(nn.Module):
         self.feed_forward_block = feed_forward_block
         
         # Define three residual connections: one for each sub-layer
-        self.residual_connections = nn.ModuleList([ResidualConnection(dropout) for _ in range(3)])
+        self.residual_connections = nn.ModuleList([ResidualConnection(features,dropout) for _ in range(3)])
 
     def forward(self, x, encoder_output, src_mask, tgt_mask):
         """
