@@ -144,8 +144,9 @@ def train_model(config):
             optimizer.step()
             optimizer.zero_grad(set_to_none=True)
 
-            # we run the validation
-            run_validation(model,val_data_loader,tokenizer_src,tokenizer_tgt,device,config['seq_len'],lambda msg: batch_iterator.write(msg) ,global_step,writer)
+            # we run the validation every 1000 steps
+            if global_step % 1000 == 0:
+                run_validation(model,val_data_loader,tokenizer_src,tokenizer_tgt,device,config['seq_len'],lambda msg: batch_iterator.write(msg) ,global_step,writer)
 
 
             global_step += 1
@@ -166,7 +167,7 @@ def greedy_decode(model,encoder_input,encoder_mask,tokenizer_src,tokenizer_tgt,m
     #precompute the encoder output and reuse it for every token we get from the decoder
     encoder_output = model.encode(encoder_input,encoder_mask) # (batch_size, seq_len, d_model)
     # we start with the sos token
-    decoder_input = torch.empty(1,1).fill_(sos_idx).to(device) # (batch_size, token for the decoder input)
+    decoder_input = torch.empty(1,1).fill_(sos_idx).type_as(encoder_input).to(device) # (batch_size, token for the decoder input)
     
     while True:
         # the decoder ouput becomes larger than the max_len, we stop
@@ -218,7 +219,7 @@ def run_validation(model,
             model_output = greedy_decode(model,encoder_input,encoder_attention_mask,tokenizer_src,tokenizer_tgt,max_len,device)
             source_sentence = batch['src_text'][0]
             expected_sentence = batch['tgt_text'][0]
-            model_output_sentence = tokenizer_tgt.decode(model_output.detach().cpu().numpy())
+            model_output_sentence = tokenizer_tgt.decode(model_output.tolist())
             source_sentences.append(source_sentence)
             expected_sentences.append(expected_sentence)
             predicted_sentences.append(model_output_sentence)
